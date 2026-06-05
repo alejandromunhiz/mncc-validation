@@ -1,0 +1,84 @@
+# Test Plan Configuration
+# Cluster: 6 nodes
+
+cluster:
+  nodes: 6
+  node_names:
+    - nemo-dev-master
+    - nemo-dev-worker1
+    - nemo-dev-worker2
+    - nemo-dev-worker3
+    - nemo-dev-worker4
+    - nemo-dev-worker5
+
+# mNCC Configuration
+mncc:
+  # IBS receives intents via RabbitMQ
+  rabbitmq:
+    host: "127.0.0.1"
+    port: 5672
+    # Exchange/queue for sending network intents to IBS
+    intent_exchange: "nemo.api.workload"
+    intent_routing_key: "intent-notify"
+    intent_queue: "network-intent"
+    # Exchange/queue for receiving L2SM annotations response from mNCC
+    response_exchange: "mncc"
+    response_routing_key: "mncc.ibs"
+    response_queue: "mncc.ibs"
+    username: "nemo-user"
+    password: "PRE4utv0ytf0fnbeuv"
+  # Kubernetes API for verifying L2SM network resources
+  kubernetes:
+    kubeconfig: "../upm-nemo-kubeconfig.yaml"
+    api_server: "https://api.main.nemo.onelab.eu:6443"
+  # L2SM configuration
+  l2sm:
+    provider_name: "default-slice"
+    domain: "api.main.nemo.onelab.eu"
+    dns_suffix: ".inter.l2sm"
+  # Intent-based API (REST alternative)
+  intent_api:
+    base_url: "https://intent-api.nemo.onelab.eu/api/v1"
+    swagger_url: "https://intent-api.nemo.onelab.eu/api/v1/swagger/"
+  timeout_seconds: 120
+
+# Experiment parameters
+experiment:
+  configurations:
+    - B1   # CNI + Manual Scripting (Flannel + kubectl)
+    - B2   # Service Mesh (Istio)
+    - mNCC # Proposed system
+  batch_sizes: [1, 10, 25, 50]
+  load_levels:
+    - idle    # No competing workloads
+    - medium  # 50% of production microservices running
+    - high    # Simulated CI/CD burst activity
+  trials_per_combination: 30
+  warmup_trials: 3  # First 3 discarded
+  significance_level: 0.05
+  target_power: 0.90
+
+# Timing
+timing:
+  clock: CLOCK_MONOTONIC
+  precision: nanosecond
+  ptp_max_offset_us: 1.0  # Max inter-node offset in microseconds
+
+# Load generation
+load_profiles:
+  idle:
+    microservices_percent: 0
+    cicd_burst: false
+  medium:
+    microservices_percent: 50
+    cicd_burst: false
+  high:
+    microservices_percent: 100
+    cicd_burst: true
+
+# Output
+output:
+  results_dir: "./results"
+  raw_data_dir: "./results/raw"
+  analysis_dir: "./results/analysis"
+  plots_dir: "./results/plots"

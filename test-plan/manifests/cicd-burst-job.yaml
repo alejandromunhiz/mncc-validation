@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cicd-burst-simulator
+  namespace: cicd-sim
+spec:
+  parallelism: 6
+  completions: 12
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+      - name: burst-worker
+        image: alpine:3.18
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "Simulating CI/CD burst workload..."
+          # CPU stress
+          dd if=/dev/urandom bs=1M count=100 | md5sum &
+          # Network stress
+          for i in $(seq 1 50); do
+            wget -q -O /dev/null http://kubernetes.default.svc.cluster.local/healthz || true
+          done
+          # Disk I/O stress
+          dd if=/dev/zero of=/tmp/burst_test bs=1M count=200 conv=fsync
+          rm -f /tmp/burst_test
+          wait
+          echo "Burst complete"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "256Mi"
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"
+      restartPolicy: Never
+  ttlSecondsAfterFinished: 60

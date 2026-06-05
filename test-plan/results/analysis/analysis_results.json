@@ -1,0 +1,110 @@
+{
+  "summary_statistics": {
+    "load=idle_N=1": {
+      "B1": {
+        "median_ms": 2221.1569985,
+        "p95_ms": 2259.98041025,
+        "p99_ms": 2263.17461645,
+        "mean_ms": 2214.2182365000003,
+        "std_ms": 48.804616868800856,
+        "cv": 0.02204146640303441,
+        "min_ms": 2150.585781,
+        "max_ms": 2263.973168,
+        "n": 4
+      },
+      "B2": {
+        "median_ms": 3847.423433,
+        "p95_ms": 3974.72988015,
+        "p99_ms": 3992.47704963,
+        "mean_ms": 3877.3377775,
+        "std_ms": 80.95888466876944,
+        "cv": 0.020880018537092607,
+        "min_ms": 3817.590402,
+        "max_ms": 3996.913842,
+        "n": 4
+      },
+      "mNCC": {
+        "median_ms": 631.363317,
+        "p95_ms": 636.4101803,
+        "p99_ms": 636.86849846,
+        "mean_ms": 626.09233725,
+        "std_ms": 14.606146184995543,
+        "cv": 0.023329060772649703,
+        "min_ms": 604.659637,
+        "max_ms": 636.983078,
+        "n": 4
+      }
+    },
+    "load=idle_N=10": {},
+    "load=idle_N=25": {},
+    "load=idle_N=50": {},
+    "load=medium_N=1": {},
+    "load=medium_N=10": {},
+    "load=medium_N=25": {},
+    "load=medium_N=50": {},
+    "load=high_N=1": {},
+    "load=high_N=10": {},
+    "load=high_N=25": {},
+    "load=high_N=50": {}
+  },
+  "statistical_tests": {},
+  "scaling_analysis": {},
+  "bottleneck_analysis": {
+    "namespace_creation": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "policy_application": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "pod_deployment": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "readiness_wait": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "connectivity_verification": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "istio_config_application": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "service_deployment": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "sidecar_readiness": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "proxy_sync": {
+      "median_ms": NaN,
+      "fraction": NaN
+    },
+    "rabbitmq_publish": {
+      "median_ms": 424.422487,
+      "fraction": 0.6874777654172689
+    },
+    "ibs_translation_l2sm_grpc": {
+      "median_ms": 192.9082345,
+      "fraction": 0.3124719496416562
+    },
+    "intent_construction": {
+      "median_ms": 0.0260215,
+      "fraction": 4.2149516627297514e-05
+    },
+    "response_validation": {
+      "median_ms": 0.0033095,
+      "fraction": 5.360714227774768e-06
+    },
+    "l2sm_network_verification": {
+      "median_ms": 0.0017130000000000001,
+      "fraction": 2.7747102197244836e-06
+    }
+  }
+}

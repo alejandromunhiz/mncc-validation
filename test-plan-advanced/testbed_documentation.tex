@@ -1,0 +1,339 @@
+\subsection{Testbed Description}
+\label{subsec:testbed}
+
+All experiments reported in this paper are conducted on a dedicated
+Kubernetes cluster deployed on the OneLab experimental facility,
+ensuring full reproducibility and isolation from production traffic.
+The testbed is designed to emulate a federated edge-cloud deployment
+at a scale representative of a single administrative domain, while
+providing the instrumentation granularity required for nanosecond-level
+performance characterisation.
+
+\subsubsection{Hardware Configuration}
+\label{subsubsec:hardware}
+
+The cluster comprises six virtualised nodes hosted on the OneLab
+bare-metal infrastructure, each provisioned as a KVM-based virtual
+machine with dedicated CPU pinning and memory reservation to minimise
+hypervisor-induced jitter.
+Table~\ref{tab:hardware} summarises the hardware specification of
+each node.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Testbed node hardware specifications.}
+  \label{tab:hardware}
+  \resizebox{\columnwidth}{!}{%
+  \begin{tabular}{lccccc}
+    \toprule
+    \textbf{Node} & \textbf{Role} & \textbf{vCPUs} & \textbf{RAM (GiB)} & \textbf{NICs} & \textbf{Kernel} \\
+    \midrule
+    \texttt{nemo-dev-master}  & Control plane & 8  & 14.5 & 2$\times$virtio & 6.8.0-100 \\
+    \texttt{nemo-dev-worker1} & Worker        & 12 & 29.2 & 2$\times$virtio & 6.8.0-100 \\
+    \texttt{nemo-dev-worker2} & Worker        & 12 & 29.2 & 2$\times$virtio & 6.8.0-100 \\
+    \texttt{nemo-dev-worker3} & Worker        & 12 & 29.2 & 2$\times$virtio & 6.8.0-100 \\
+    \texttt{nemo-dev-worker4} & Worker        & 12 & 29.2 & 2$\times$virtio & 6.8.0-100 \\
+    \texttt{nemo-dev-worker5} & Worker        & 10 & 29.2 & 2$\times$virtio & 6.8.0-79  \\
+    \bottomrule
+  \end{tabular}%
+  }
+\end{table}
+
+All nodes are equipped with Intel Xeon Cascadelake processors
+operating at a nominal frequency of 2.89~GHz, with 16~MB of shared
+L3 cache per socket.
+Each node exposes two paravirtualised network interfaces
+(\texttt{virtio\_net} driver):
+\texttt{enp1s0}, connected to the public-facing network
+(\texttt{132.227.122.0/24}), and
+\texttt{enp7s0}, connected to the cluster-internal management and
+data plane network (\texttt{192.168.111.0/24}).
+Both interfaces operate at a virtual line rate equivalent to 10~Gbps
+with an MTU of 1500~bytes (1450~bytes for overlay traffic due to
+VXLAN encapsulation overhead).
+The operating system on all nodes is Ubuntu~24.04.2~LTS with
+Linux kernel~6.8.0 (generic variant).
+
+\subsubsection{Network Topology}
+\label{subsubsec:topology}
+
+\paragraph{Layer~2/Layer~3 underlay.}
+The cluster-internal network uses a flat Layer~2 segment on the
+\texttt{192.168.111.0/24} subnet, interconnecting all six nodes
+via a shared virtual bridge on the OneLab infrastructure.
+The public network (\texttt{132.227.122.0/24}) provides external
+API access to the Kubernetes control plane at
+\texttt{api.main.nemo.onelab.eu:6443} and hosts the MetalLB load
+balancer pool (\texttt{132.227.122.26--30}) for externally
+reachable services.
+Default routing on all nodes egresses via \texttt{132.227.122.1}
+on the public interface.
+
+\paragraph{Overlay network (CNI).}
+Pod-to-pod communication is managed by Flannel~v0.26.4 operating
+in VXLAN mode with a pod CIDR of \texttt{10.244.0.0/16}, allocating
+a \texttt{/24} subnet per node.
+The VXLAN tunnel interface (\texttt{flannel.1}) encapsulates pod
+traffic over the cluster-internal \texttt{192.168.111.0/24}
+network, adding a 50-byte overhead (outer UDP + VXLAN header) to
+each frame and resulting in an effective overlay MTU of 1450~bytes.
+Multus~CNI (snapshot release) is deployed as a secondary CNI plugin
+to enable attachment of additional network interfaces to pods, as
+required by the L2S-M overlay segments provisioned by the mNCC.
+
+\paragraph{Layer~2 Slice Manager (L2S-M) overlay.}
+The mNCC provisions on-demand Layer~2 overlay segments via the
+L2S-M Connectivity Controller (image: \texttt{alexdecb/l2sm-md:0.4}),
+which exposes a gRPC interface on port~50051
+(\texttt{l2sm-grpc-service.nemo-net.svc.cluster.local}).
+Overlay segments are instantiated as VXLAN tunnels between
+designated Network Edge Devices (NEDs) running on the worker nodes,
+with segment membership managed via Network Attachment Definitions
+created by the L2S-M operator.
+A dedicated CoreDNS instance
+(\texttt{l2sm-coredns}) resolves overlay-internal names using the
+\texttt{.inter.l2sm} suffix.
+
+\paragraph{Inter-cluster connectivity.}
+Cross-cluster overlay reachability is achieved through BGP-based
+underlay routing (assumption~A1).
+Each cluster boundary is managed by an ExaBGP instance advertising
+the local pod CIDR prefixes to neighbouring Autonomous Systems.
+The ONOS SDN controller orchestrates flow rules on the NED
+switches to steer cross-cluster traffic through the appropriate
+VXLAN tunnels.
+
+\subsubsection{Software Stack}
+\label{subsubsec:software_stack}
+
+Table~\ref{tab:software} details the key software components and
+their versions as deployed on the testbed.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Software stack deployed on the evaluation testbed.}
+  \label{tab:software}
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{Component} & \textbf{Version} \\
+    \midrule
+    Kubernetes                 & v1.29.13 \\
+    Container runtime          & containerd~1.7.28 \\
+    Flannel (CNI)              & v0.26.4 (VXLAN backend) \\
+    Multus CNI                 & snapshot \\
+    mNCC Intent-Based System   & v0.0.19 \\
+    L2S-M Connectivity Controller & 0.4 \\
+    NeMeX (Network Metrics)    & latest \\
+    Network Probe              & v1.0.0 \\
+    Prometheus Operator        & (kube-prometheus-stack) \\
+    Grafana                    & (bundled) \\
+    Kepler (energy telemetry)  & 0.7.10 \\
+    MetalLB                    & (L2 mode) \\
+    Kong API Gateway           & (nemo-sec) \\
+    RabbitMQ                   & (single-node, nemo-sec) \\
+    Rook-Ceph (storage)        & (RBD + CephFS) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Time Synchronisation}
+\label{subsubsec:ptp}
+
+Accurate cross-node time synchronisation is a prerequisite for
+meaningful per-stage provisioning decomposition and fault detection
+latency measurements.
+The virtualised environment does not expose hardware PTP
+(IEEE~1588) clock devices at the guest level; therefore, time
+synchronisation is enforced via the \texttt{kvm-clock} clocksource
+provided by the hypervisor, which synchronises all guest clocks to
+the host's hardware reference.
+Within each node, high-resolution timestamps are obtained using
+\texttt{clock\_gettime(CLOCK\_MONOTONIC)} with nanosecond
+precision, ensuring monotonicity and immunity to NTP step
+adjustments.
+
+Prior to each measurement session, inter-node clock offset is
+verified by exchanging ICMP timestamp probes between all node pairs
+and computing the one-way delay asymmetry.
+The measured inter-node offset was consistently below 10~\textmu s
+across all pairs during the evaluation period---well within the
+tolerance required for the millisecond-scale measurements reported
+in this work.
+For the self-healing experiments (Section~\ref{subsec:selfhealing_methodology}),
+where detection latencies can reach the sub-second range, this
+synchronisation precision introduces a maximum measurement
+uncertainty of $<\!0.01\%$ relative to the observed values.
+
+\subsubsection{Instrumentation and Monitoring}
+\label{subsubsec:instrumentation}
+
+The testbed deploys a comprehensive monitoring stack to provide
+continuous observability of network, compute, and energy metrics:
+
+\begin{description}
+  \item[Network Probe DaemonSet.]
+    A custom network monitoring agent
+    (\texttt{mncc-underlay-network-probe:v1.0.0}) is deployed on
+    all five worker nodes as a Kubernetes DaemonSet.
+    Each probe instance performs active measurements of underlay
+    link quality, reporting four metric classes: \emph{throughput},
+    \emph{latency}, \emph{packet loss}, and \emph{link failure
+    detection}.
+    The measurement cycle operates with a configurable inter-probe
+    delay of \textbf{120~seconds}, yielding a sampling frequency of
+    $f_s = 1/120 \approx 8.3 \times 10^{-3}$~Hz per link per
+    metric.
+    Metrics are exposed via a Prometheus-compatible endpoint on
+    port~5001.
+
+  \item[NeMeX (Network Metrics Exporter).]
+    The NeMeX component (\texttt{mncc-nemex:latest}) aggregates
+    network performance metrics from the probe DaemonSet and
+    computes derived indicators (e.g., link health scores,
+    threshold violations) used by the mNCC self-healing logic for
+    fault classification and remediation triggering.
+
+  \item[Prometheus \& Grafana.]
+    A full Prometheus Operator deployment
+    (namespace: \texttt{nemo-net}) scrapes all instrumented
+    endpoints at 15-second intervals, providing long-term metric
+    storage with a default retention of 15~days.
+    Grafana dashboards visualise real-time and historical cluster
+    state.
+    A secondary Prometheus instance (namespace: \texttt{nemo-ppef})
+    with node-exporter DaemonSets provides host-level CPU, memory,
+    disk, and network utilisation metrics.
+
+  \item[Kepler (energy).]
+    The Kepler DaemonSet (v0.7.10) provides per-pod and per-node
+    energy consumption estimates derived from hardware performance
+    counters (RAPL) and eBPF-based resource accounting, enabling
+    correlation of provisioning overhead with energy cost.
+
+  \item[Falco (security audit).]
+    Falco is deployed on all six nodes (namespace: \texttt{nemo-svc})
+    for runtime security monitoring and syscall-level audit logging,
+    relevant to the security overhead evaluation in
+    Section~\ref{subsec:security_methodology}.
+\end{description}
+
+\subsubsection{mNCC Control Plane Architecture}
+\label{subsubsec:mncc_controlplane}
+
+The mNCC control plane components relevant to the evaluation are
+deployed in the \texttt{nemo-net} namespace:
+
+\begin{enumerate}
+  \item \textbf{Intent-Based System (IBS)} ---
+    Receives network intents via the RabbitMQ message broker
+    (exchange: \texttt{nemo.api.workload}, routing key:
+    \texttt{intent-notify}).
+    The IBS parses the intent JSON payload, resolves the
+    \texttt{objectType} (e.g., \texttt{L2SM\_NETWORK}), and
+    dispatches CRUD operations to the appropriate Connectivity
+    Controller via gRPC.
+    Responses are published to the \texttt{mncc} exchange
+    (routing key: \texttt{mncc.ibs}).
+
+  \item \textbf{L2S-M Connectivity Controller} ---
+    Implements the network provisioning logic: overlay segment
+    creation, NED configuration, tunnel establishment, and
+    security policy enforcement (MACsec, RBAC).
+    Exposes a gRPC API on port~50051.
+
+  \item \textbf{Identity and Credential Provider} ---
+    The \texttt{l2sm-idcoprovider} manages ONOS controller
+    credentials and SDN southbound authentication.
+
+  \item \textbf{Security Gateway (Kong + OAuth2)} ---
+    Deployed in \texttt{nemo-sec}, the Kong API gateway with
+    OAuth2 proxy enforces authentication and rate limiting on
+    external API access.
+    RabbitMQ handles inter-component message authentication via
+    AMQP credentials.
+\end{enumerate}
+
+\subsubsection{Measurement Tools}
+\label{subsubsec:tools}
+
+Table~\ref{tab:tools} summarises the measurement tools employed
+across the five experiments.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Measurement tools and their configuration per experiment.}
+  \label{tab:tools}
+  \resizebox{\columnwidth}{!}{%
+  \begin{tabular}{lllc}
+    \toprule
+    \textbf{Experiment} & \textbf{Tool} & \textbf{Configuration} & \textbf{Sampling} \\
+    \midrule
+    E1--E2 (Provisioning)
+      & \texttt{clock\_gettime} & \texttt{CLOCK\_MONOTONIC}, ns precision & per-event \\
+      & RabbitMQ timestamps     & AMQP message headers                    & per-intent \\
+    \midrule
+    E3 (Self-healing)
+      & UDP probe stream & 100-ms interval, custom sender/receiver & 10~Hz \\
+      & NeMeX fault log  & Threshold-based event classification     & per-event \\
+      & \texttt{kubectl} & Node drain, cordon, uncordon             & per-trial \\
+    \midrule
+    E4 (Security CP)
+      & \texttt{clock\_gettime} & Per-security-layer instrumentation & per-request \\
+      & \texttt{kubectl auth}   & RBAC evaluation via API server     & per-request \\
+    \midrule
+    E5 (Data plane)
+      & \texttt{iperf3}  & 8 parallel streams, 60-s window        & per-trial \\
+      & ICMP ping        & RTT/2 approximation, 100 probes        & per-trial \\
+      & Metrics API      & Node CPU utilisation                   & per-trial \\
+    \bottomrule
+  \end{tabular}%
+  }
+\end{table}
+
+\subsubsection{Baseline Characterisation}
+\label{subsubsec:baseline_char}
+
+Prior to the controlled experiments, a 24-hour monitoring campaign
+was conducted to characterise the testbed's steady-state behaviour.
+The network probe DaemonSet recorded underlay metrics across all
+$\binom{5}{2} = 10$ worker-to-worker link pairs at 120-second
+intervals, yielding 720 samples per link over the observation
+window.
+Table~\ref{tab:stats} reports the aggregate statistics.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Underlay network baseline statistics (24-hour campaign).}
+  \label{tab:stats}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Metric} & \textbf{Mean} & \textbf{Std.} & \textbf{CV} & \textbf{P99} \\
+    \midrule
+    Throughput (Gbps)     & $\sim$9.4  & 1.3  & 0.14 & 7.1 \\
+    One-way latency (ms)  & $\sim$0.18 & 0.03 & 0.17 & 0.28 \\
+    Packet loss (\%)      & $<$0.01    & ---  & ---  & 0.02 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The coefficient of variation $\mathrm{CV} \approx 0.14$ for
+throughput confirms low temporal variability, validating the
+power analysis assumptions used to determine the sample sizes
+in Section~\ref{subsec:methodology}.
+The sub-millisecond baseline latency and negligible packet loss
+indicate a healthy underlay suitable for isolating overlay
+provisioning effects from infrastructure noise.
+
+\subsubsection{Reproducibility}
+\label{subsubsec:reproducibility}
+
+The complete testbed configuration---including Kubernetes manifests,
+Helm charts, network probe deployment, mNCC component images, and
+all measurement scripts---is archived in the project repository.
+The cluster state can be restored to the evaluation baseline by
+applying the versioned manifests against a fresh Kubernetes~v1.29
+installation on equivalent hardware.
+All raw measurement data, statistical analysis notebooks, and
+plotting scripts are publicly available to enable independent
+verification of the results presented in
+Section~\ref{sec:results}.

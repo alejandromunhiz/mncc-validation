@@ -1,0 +1,109 @@
+# Advanced Test Plan Configuration
+# Self-Healing (E3), Security Control Plane (E4), Security Data Plane (E5)
+
+cluster:
+  nodes: 6
+  node_names:
+    - nemo-dev-master
+    - nemo-dev-worker1
+    - nemo-dev-worker2
+    - nemo-dev-worker3
+    - nemo-dev-worker4
+    - nemo-dev-worker5
+  kubeconfig: /home/amuniz/upm-nemo-kubeconfig.yaml
+
+# mNCC Configuration (same as provisioning test plan)
+mncc:
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: nemo-user
+    password: PRE4utv0ytf0fnbeuv
+    intent_exchange: nemo.api.workload
+    intent_routing_key: intent-notify
+    response_exchange: mncc
+    response_routing_key: mncc.ibs
+    response_queue: mncc-test-response
+  l2sm:
+    provider_name: default-slice
+    domain: api.main.nemo.onelab.eu
+    dns_suffix: .inter.l2sm
+  kubernetes:
+    kubeconfig: /home/amuniz/upm-nemo-kubeconfig.yaml
+  timeout_seconds: 120
+
+# ---------------------------------------------------------------------------
+# E3: Self-Healing Evaluation
+# ---------------------------------------------------------------------------
+selfhealing:
+  trials_per_fault: 20
+  stabilisation_window_s: 300    # 5 minutes baseline
+  probe_interval_ms: 100         # UDP probe every 100ms
+  random_offset_window_s: 120    # 2-min randomised fault injection offset
+  recovery_window_samples: 10    # 10 consecutive probes for recovery
+  latency_tolerance: 1.1         # lat <= 1.1 * baseline
+  bandwidth_tolerance: 0.9       # bw >= 0.9 * baseline
+  operator_delay_s: 45           # Simulated manual operator delay for B0
+  fault_types:
+    - F1  # Link failure
+    - F2  # Worker node loss
+    - F3  # BGP route withdrawal
+  # F1 config
+  link_failure:
+    source_node: nemo-dev-worker1
+    target_node: nemo-dev-worker2
+    interface: eth0  # Will be auto-detected
+  # F2 config
+  node_loss:
+    target_node: nemo-dev-worker3
+  # F3 config
+  bgp_withdrawal:
+    exabgp_host: nemo-dev-master
+    prefix: "10.244.3.0/24"
+    asn: 65000
+
+# ---------------------------------------------------------------------------
+# E4: Security Control Plane Overhead
+# ---------------------------------------------------------------------------
+security_controlplane:
+  requests_per_config: 100
+  warmup_requests: 5
+  batch_size: 1
+  load_level: idle
+  configurations:
+    - S0  # No security (baseline)
+    - S1  # JWT verification only
+    - S2  # S1 + Vault/Keycloak resolution
+    - S3  # S2 + RBAC evaluation
+    - S4  # Full security stack (production)
+  # Security service endpoints
+  vault_endpoint: "http://vault.nemo-sec.svc.cluster.local:8200"
+  keycloak_endpoint: "http://keycloak.nemo-sec.svc.cluster.local:8080"
+
+# ---------------------------------------------------------------------------
+# E5: Security Data Plane Overhead (MACsec)
+# ---------------------------------------------------------------------------
+security_dataplane:
+  trials_per_combination: 10
+  warmup_trials: 1
+  iperf_duration_seconds: 60
+  iperf_streams: 8
+  configurations:
+    - D0  # No encryption (baseline)
+    - D1  # MACsec GCM-AES-128
+    - D2  # MACsec GCM-AES-256
+  packet_sizes:
+    - 64
+    - 512
+    - 1500
+    - 9000
+  scenarios:
+    - intra-cluster
+    - cross-cluster
+  # Node pairs for testing
+  intra_cluster:
+    sender: nemo-dev-worker1
+    receiver: nemo-dev-worker2
+  cross_cluster:
+    sender: nemo-dev-worker1
+    receiver: nemo-dev-worker4  # Simulated as cross-cluster via VXLAN

@@ -1,0 +1,85 @@
+# =========================
+# Ignorar TODOS los archivos ocultos
+# =========================
+.*
+!.gitignore
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.pyo
+*__pycache__/
+.local/
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# Distribución / empaquetado
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Testing / cobertura
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+
+# Logs
+*.log
+
+# =========================
+# Bash / Shell
+# =========================
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Archivos temporales de shell
+*.sh~
+*.bash_history
+
+# =========================
+# Credenciales y secretos
+# =========================
+.env
+.env.*
+*.env
+*.key
+*.pem
+secrets.*
+credentials.*
+
+# =========================
+# Sistema operativo
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Editores / IDEs
+# =========================
+.vscode/
+.idea/
+*.code-workspace
+
+# =========================
+# Otros
+# =========================
+*.out
+*.exe
+*.o
+*.class
+*kubeconfig.yaml
