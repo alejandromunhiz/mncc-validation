@@ -1,0 +1,18 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-4f4299c4",
+    "valid": false,
+    "failure_reason": "mNCC detection timeout; no correlated event received"
+  },
+  {
+    "fault_type": "F2",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F2-mNCC-1-96daadfd",
+    "valid": false,
+    "failure_reason": "mNCC detection timeout; no correlated event received"
+  }
+]

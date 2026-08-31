@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F2",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F2-mNCC-1-52588b6c",
+    "valid": false,
+    "failure_reason": "Invalid timestamp ordering: expected T_fault <= T_detect <= T_recover"
+  }
+]

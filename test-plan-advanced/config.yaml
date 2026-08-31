@@ -23,6 +23,7 @@ mncc:
     intent_routing_key: intent-notify
     response_exchange: mncc
     response_routing_key: mncc.ibs
+    monitoring_routing_key: mncc.#
     response_queue: mncc-test-response
   l2sm:
     provider_name: default-slice
@@ -39,7 +40,18 @@ selfhealing:
   trials_per_fault: 20
   stabilisation_window_s: 300    # 5 minutes baseline
   probe_interval_ms: 100         # UDP probe every 100ms
+  probe_payload_bytes: 1200      # UDP payload used for measured probe throughput
+  probe_port: 9999
   random_offset_window_s: 120    # 2-min randomised fault injection offset
+  detection_timeout_s: 300
+  recovery_timeout_s: 300
+  # Detection is deliberately external: mNCC cannot be modified to emit
+  # trial-correlated internal events.
+  detection_source: external_probe
+  detection_sources:
+    F1: external_probe
+    F2: kubernetes_workload_relocation
+  external_probe_consecutive_failures: 3
   recovery_window_samples: 10    # 10 consecutive probes for recovery
   latency_tolerance: 1.1         # lat <= 1.1 * baseline
   bandwidth_tolerance: 0.9       # bw >= 0.9 * baseline
@@ -47,12 +59,15 @@ selfhealing:
   fault_types:
     - F1  # Link failure
     - F2  # Worker node loss
-    - F3  # BGP route withdrawal
-  # F1 config
-  link_failure:
-    source_node: nemo-dev-worker1
+  # F1 config: L2SM link fault injected through a privileged host-network pod.
+  # Set interface to the dedicated L2SM/underlay interface on source_node.
+  # Never set this to flannel.1, cni*, docker*, br-* or another shared interface.
+  l2sm_failure:
+    source_node: nemo-dev-worker4
     target_node: nemo-dev-worker2
-    interface: eth0  # Will be auto-detected
+    # No dedicated L2SM interface has been identified in the current cluster.
+    # enp7s0 is the Kubernetes-internal node network and must not be disabled.
+    interface: null
   # F2 config
   node_loss:
     target_node: nemo-dev-worker3
@@ -61,6 +76,10 @@ selfhealing:
     exabgp_host: nemo-dev-master
     prefix: "10.244.3.0/24"
     asn: 65000
+    # Commands must target the real ExaBGP control interface in this testbed.
+    # The script refuses to guess a socket, shell, neighbor, or image.
+    withdraw_command: null
+    announce_command: null
 
 # ---------------------------------------------------------------------------
 # E4: Security Control Plane Overhead

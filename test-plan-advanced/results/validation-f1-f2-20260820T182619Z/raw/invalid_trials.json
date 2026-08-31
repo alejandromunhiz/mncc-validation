@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-0909f73b",
+    "valid": false,
+    "failure_reason": "Recovery timeout; ten consecutive valid probes were not observed"
+  }
+]

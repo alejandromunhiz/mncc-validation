@@ -1,0 +1,21 @@
+[
+  {
+    "fault_type": "F2",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "baseline_latency_us": 510.90796341463425,
+    "baseline_bandwidth_mbps": 0.013498068357693094,
+    "t_fault_ns": 4060781833852689,
+    "t_detect_ns": 4060817595450997,
+    "t_recover_ns": 4060830519101252,
+    "delta_t_detect_ms": 35761.598308,
+    "delta_t_recover_ms": 12923.650255,
+    "delta_t_impact_ms": 48685.248563,
+    "packet_loss_ratio": 0.014705882352941176,
+    "peak_latency_us": 1158.801,
+    "detection_source": "kubernetes_workload_relocation",
+    "valid": true,
+    "failure_reason": null,
+    "timestamp": "2026-08-31T10:45:36.788194"
+  }
+]

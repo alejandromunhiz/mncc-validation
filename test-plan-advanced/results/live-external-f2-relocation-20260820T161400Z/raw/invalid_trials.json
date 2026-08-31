@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F2",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F2-mNCC-1-5eb1ab21",
+    "valid": false,
+    "failure_reason": "External detection timeout for source kubernetes_workload_relocation; no qualifying observation was recorded"
+  }
+]

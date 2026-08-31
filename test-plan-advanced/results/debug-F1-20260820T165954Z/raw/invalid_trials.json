@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-fcbf4f18",
+    "valid": false,
+    "failure_reason": "External detection timeout for source external_probe; no qualifying observation was recorded"
+  }
+]

@@ -86,27 +86,51 @@ cd test-plan && ./run.sh
 
 **Location:** `test-plan-advanced/run_selfhealing.py`
 
-Evaluates autonomous fault detection and remediation by injecting three
-fault classes:
+Evaluates externally observed service disruption and recovery by injecting two
+fault classes. Internal mNCC detection events cannot be correlated with an
+individual trial because mNCC is treated as immutable:
 
 | Fault | Method | Failure mode |
 |:---|:---|:---|
-| **F1** | `ip link set <iface> down` | Physical link failure |
+| **F1** | Privileged host-network pod + `ip link` | Dedicated L2SM interface failure |
 | **F2** | `kubectl drain` + `cordon` | Worker node loss |
-| **F3** | ExaBGP prefix withdrawal | BGP route failure |
+F3 (BGP route withdrawal) is out of scope because the static testbed does not
+deploy a dynamic BGP control plane.
 
 **Protocol:**
-1. Establish UDP probe stream (100-ms interval) between two pods
-2. Record 5-minute baseline (latency, throughput)
-3. Inject fault at randomised offset within 2-min window
-4. Monitor detection ($T_\text{detect}$) and recovery ($T_\text{recover}$)
-5. Recovery criterion: 10 consecutive probes with lat ≤ 1.1× baseline AND bw ≥ 0.9× baseline
+1. Create an isolated namespace and persistent UDP echo receiver for each trial
+2. Establish a tagged UDP probe stream (100-ms interval) between two pods
+3. Record a 5-minute baseline (latency and measured probe-stream throughput)
+4. Inject the fault at a randomised offset within a 2-min window
+5. Detect impact using an independent observer: UDP probe loss for F1 and
+workload relocation for F2; neither is an internal mNCC measurement
+6. Detect recovery using 10 consecutive valid samples with lat ≤ 1.1× baseline AND bw ≥ 0.9× baseline
+7. For mNCC, restore the fault only after measurement; for B0, restore it
+   as part of the simulated operator remediation after the 45-s delay, then
+   request namespace cleanup without blocking on cluster finalization
 
 **Configurations:**
 - $\mathcal{C}_\text{mNCC}$: Autonomous self-healing (proposed)
 - $\mathcal{C}_\text{B0}$: Manual remediation baseline (simulated operator delay ~45 s)
 
-**Trials:** 20 per fault class × 2 configurations = 120 total
+**Trials:** 20 per fault class × 2 configurations = 80 total
+
+Each raw output separates valid observations from `invalid_trials.json`; invalid
+trials are excluded from statistical summaries. The `mNCC` series reports
+externally observed impact and recovery, not an internal mNCC detection event.
+F1 disables an explicitly configured dedicated L2SM/underlay interface from a
+privileged `hostNetwork` pod scheduled on the source node, then re-enables it for
+cleanup or manual recovery. The interface is mandatory and the runner refuses
+known shared Kubernetes interfaces such as `flannel.1`. This requires permission
+to create privileged pods; it does not require node SSH access or the L2S-M CRDs.
+The test does not discover or guess an interface:
+`selfhealing.l2sm_failure.interface` must be set to the actual L2SM link, and the
+selected source/target nodes must have a separate management path.
+F3 is not executable in this static-underlay campaign.
+
+`nemo-dev-worker1` is excluded from the formal campaign because it is currently
+`NotReady` and requires administrator or out-of-band console access for
+recovery. F1 uses workers 4 and 2; F2 continues to target worker 3.
 
 **Run:**
 ```bash

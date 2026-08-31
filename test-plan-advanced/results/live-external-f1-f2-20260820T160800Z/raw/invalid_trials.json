@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F2",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F2-mNCC-1-3a2bb939",
+    "valid": false,
+    "failure_reason": "External detection timeout for source external_probe; no qualifying observation was recorded"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F2",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F2-mNCC-1-519dec9c",
+    "valid": false,
+    "failure_reason": "mNCC detection timeout; no correlated event received"
+  }
+]

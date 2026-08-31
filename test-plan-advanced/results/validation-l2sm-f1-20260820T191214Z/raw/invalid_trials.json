@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-f9a0ea43",
+    "valid": false,
+    "failure_reason": "L2SM intent was processed, but no NetworkAttachmentDefinition for 'selfhealing-cc80e9b550' became present in namespace 'default' within 120s. This L2SM deployment returns pod patches instead of creating NADs; F1 cannot attach the external probes in this cluster."
+  }
+]

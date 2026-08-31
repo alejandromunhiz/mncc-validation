@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-a20ff0d5",
+    "valid": false,
+    "failure_reason": "Probe pods did not reach Ready state \u2014 see logs above for details"
+  }
+]

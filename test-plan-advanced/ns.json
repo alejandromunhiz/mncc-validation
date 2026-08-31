@@ -1,0 +1,60 @@
+{
+    "apiVersion": "v1",
+    "kind": "Namespace",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Namespace\",\"metadata\":{\"annotations\":{},\"name\":\"selfhealing-test\"}}\n"
+        },
+        "creationTimestamp": "2026-06-05T09:37:05Z",
+        "deletionTimestamp": "2026-06-06T03:50:28Z",
+        "labels": {
+            "kubernetes.io/metadata.name": "selfhealing-test"
+        },
+        "name": "selfhealing-test",
+        "resourceVersion": "387447622",
+        "uid": "367009bd-1050-4474-8548-c62956b57ee9"
+    },
+    "spec": {
+        "finalizers": []
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-06-06T03:50:38Z",
+                "message": "Discovery failed for some groups, 1 failing: unable to retrieve the complete list of server APIs: tap.linkerd.io/v1alpha1: stale GroupVersion discovery: tap.linkerd.io/v1alpha1",
+                "reason": "DiscoveryFailed",
+                "status": "True",
+                "type": "NamespaceDeletionDiscoveryFailure"
+            },
+            {
+                "lastTransitionTime": "2026-06-06T03:50:39Z",
+                "message": "All legacy kube types successfully parsed",
+                "reason": "ParsedGroupVersions",
+                "status": "False",
+                "type": "NamespaceDeletionGroupVersionParsingFailure"
+            },
+            {
+                "lastTransitionTime": "2026-06-06T03:51:11Z",
+                "message": "All content successfully deleted, may be waiting on finalization",
+                "reason": "ContentDeleted",
+                "status": "False",
+                "type": "NamespaceDeletionContentFailure"
+            },
+            {
+                "lastTransitionTime": "2026-06-06T03:51:11Z",
+                "message": "All content successfully removed",
+                "reason": "ContentRemoved",
+                "status": "False",
+                "type": "NamespaceContentRemaining"
+            },
+            {
+                "lastTransitionTime": "2026-06-06T03:50:39Z",
+                "message": "All content-preserving finalizers finished",
+                "reason": "ContentHasNoFinalizers",
+                "status": "False",
+                "type": "NamespaceFinalizersRemaining"
+            }
+        ],
+        "phase": "Terminating"
+    }
+}

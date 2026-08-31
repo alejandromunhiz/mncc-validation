@@ -1,0 +1,30 @@
+{
+  "F2": {
+    "mNCC": {
+      "delta_t_detect_ms": {
+        "median": 0.496504,
+        "p95": 0.496504,
+        "mean": 0.496504
+      },
+      "delta_t_recover_ms": {
+        "median": 13631.734136,
+        "p95": 13631.734136,
+        "mean": 13631.734136
+      },
+      "delta_t_impact_ms": {
+        "median": 13632.23064,
+        "p95": 13632.23064,
+        "mean": 13632.23064
+      },
+      "packet_loss_ratio": {
+        "median": 0.0,
+        "p95": 0.0
+      },
+      "peak_latency_us": {
+        "median": 687.104,
+        "p95": 687.104
+      },
+      "n_trials": 1
+    }
+  }
+}

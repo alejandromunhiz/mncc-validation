@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-7625b6a0",
+    "valid": false,
+    "failure_reason": "F1 injection timed out: Command '['kubectl', '--kubeconfig', '/home/amuniz/upm-nemo-kubeconfig.yaml', 'exec', '-n', 'kube-flannel', 'kube-flannel-ds-pw8h5', '--', 'sh', '-c', 'ip link set enp7s0 down >/dev/null 2>&1 </dev/null &']' timed out after 15 seconds"
+  }
+]

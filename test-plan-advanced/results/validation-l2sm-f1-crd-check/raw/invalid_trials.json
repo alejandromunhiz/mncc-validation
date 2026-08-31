@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-486cbeae",
+    "valid": false,
+    "failure_reason": "Could not create L2SM network: error: resource mapping not found for name: \"selfhealing-7c9d768cf9\" namespace: \"selfhealing-063bbbb3fc32\" from \"STDIN\": no matches for kind \"L2Network\" in version \"l2sm.l2sm.k8s.local/v1\"\nensure CRDs are installed first"
+  }
+]

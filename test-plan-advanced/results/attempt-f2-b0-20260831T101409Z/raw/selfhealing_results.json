@@ -1,0 +1,21 @@
+[
+  {
+    "fault_type": "F2",
+    "configuration": "B0",
+    "trial_number": 1,
+    "baseline_latency_us": 575.4469499999999,
+    "baseline_bandwidth_mbps": 0.013377548209724924,
+    "t_fault_ns": 4058984110919003,
+    "t_detect_ns": 4059064299860616,
+    "t_recover_ns": 4059087652648398,
+    "delta_t_detect_ms": 80188.941613,
+    "delta_t_recover_ms": 23352.787782,
+    "delta_t_impact_ms": 103541.729395,
+    "packet_loss_ratio": 0.014814814814814815,
+    "peak_latency_us": 3069.402,
+    "detection_source": "manual_operator",
+    "valid": true,
+    "failure_reason": null,
+    "timestamp": "2026-08-31T10:16:33.899000"
+  }
+]

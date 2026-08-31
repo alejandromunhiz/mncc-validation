@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-86abb44d",
+    "valid": false,
+    "failure_reason": "L2SM network selfhealing-d56ffc7060 did not become present within 120s"
+  }
+]

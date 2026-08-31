@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-c68c7df3",
+    "valid": false,
+    "failure_reason": "F1 interface configuration is incomplete: interface. Set l2sm_failure.interface to the L2SM/underlay interface; never use flannel.1."
+  }
+]

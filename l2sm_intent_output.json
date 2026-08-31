@@ -1,0 +1,85 @@
+{
+  "userLabel": "cloud_continuum",
+  "Intent": {
+    "id": "mncc_l2sm_validation_fbb1793f-2f73-47a9-853c-cc3b72166792",
+    "userLabel": "cloud_continuum",
+    "intentExpectations": [
+      {
+        "expectationId": "1",
+        "expectationVerb": "DELIVER",
+        "expectationObject": {
+          "objectType": "L2SM_NETWORK",
+          "objectInstance": "mncc-l2sm-validation",
+          "objectContexts": [
+            {
+              "contextAttribute": "name",
+              "contextCondition": "IS_EQUAL_TO",
+              "contextValueRange": "mncc-l2sm-validation"
+            },
+            {
+              "contextAttribute": "providerName",
+              "contextCondition": "IS_EQUAL_TO",
+              "contextValueRange": "default-slice"
+            },
+            {
+              "contextAttribute": "domain",
+              "contextCondition": "IS_EQUAL_TO",
+              "contextValueRange": "api.main.nemo.onelab.eu"
+            }
+          ]
+        },
+        "expectationTargets": [
+          {
+            "targetName": "secure",
+            "targetCondition": "IS_EQUAL_TO",
+            "targetValueRange": "true"
+          }
+        ]
+      }
+    ],
+    "intentContexts": [
+      {
+        "contextAttribute": "NEMO_WORKLOAD",
+        "contextCondition": "IS_EQUAL_TO",
+        "contextValueRange": "fbb1793f-2f73-47a9-853c-cc3b72166792"
+      }
+    ],
+    "intentPriority": 1,
+    "observationPeriod": 60,
+    "intentAdminState": "ACTIVATED"
+  }
+}
+=== ALL_RESPONSES_JSON ===
+[
+  {
+    "workload": "fbb1793f-2f73-47a9-853c-cc3b72166792",
+    "pod": {
+      "labels": {
+        "l2sm": "true",
+        "l2sm/app": "<workload-name>"
+      },
+      "annotations": {
+        "l2sm/networks": "mncc-l2sm-validation"
+      },
+      "env": {
+        "DNS_NAME": "<workload-name>.mncc-l2sm-validation.inter.l2sm"
+      }
+    }
+  }
+]
+=== CORRELATED_RESPONSE_JSON ===
+{
+  "workload": "fbb1793f-2f73-47a9-853c-cc3b72166792",
+  "pod": {
+    "labels": {
+      "l2sm": "true",
+      "l2sm/app": "<workload-name>"
+    },
+    "annotations": {
+      "l2sm/networks": "mncc-l2sm-validation"
+    },
+    "env": {
+      "DNS_NAME": "<workload-name>.mncc-l2sm-validation.inter.l2sm"
+    }
+  }
+}

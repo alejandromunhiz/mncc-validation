@@ -1,0 +1,10 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "trial_id": "F1-mNCC-1-13003094",
+    "valid": false,
+    "failure_reason": "F1 injection failed and interface restoration also failed: Command failed (rc=1): kubectl --kubeconfig /home/amuniz/upm-nemo-kubeconfig.yaml wait --for=condition=Ready pod/f1-host-b386d23a4a -n default --timeout=60s; error: timed out waiting for the condition on pods/f1-host-b386d23a4a"
+  }
+]

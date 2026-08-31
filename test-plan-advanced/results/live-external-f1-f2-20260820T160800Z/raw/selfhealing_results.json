@@ -1,0 +1,21 @@
+[
+  {
+    "fault_type": "F1",
+    "configuration": "mNCC",
+    "trial_number": 1,
+    "baseline_latency_us": 501.79185000000007,
+    "baseline_bandwidth_mbps": 0.02160517588825228,
+    "t_fault_ns": 3129766274204518,
+    "t_detect_ns": 3129773669131182,
+    "t_recover_ns": 3129792504415674,
+    "delta_t_detect_ms": 7394.926664,
+    "delta_t_recover_ms": 18835.284492,
+    "delta_t_impact_ms": 26230.211156,
+    "packet_loss_ratio": 0.07692307692307693,
+    "peak_latency_us": 901.1145,
+    "detection_source": "external_probe",
+    "valid": true,
+    "failure_reason": null,
+    "timestamp": "2026-08-20T16:08:25.132220"
+  }
+]
